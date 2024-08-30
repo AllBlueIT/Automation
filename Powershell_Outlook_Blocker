@@ -1,0 +1,28 @@
+# Create Outlook COM object
+$outlook = New-Object -ComObject Outlook.Application
+$namespace = $outlook.GetNamespace("MAPI")
+
+# Access the default calendar folder
+$calendar = $namespace.GetDefaultFolder([Microsoft.Office.Interop.Outlook.OlDefaultFolders]::olFolderCalendar)
+
+# Loop through each month of the current year (can be adjusted for other years)
+$currentYear = (Get-Date).Year
+1..12 | ForEach-Object {
+    # Get the last day of the month
+    $lastDay = (Get-Date -Year $currentYear -Month $_ -Day 1).AddMonths(1).AddDays(-1)
+
+    # Create a new appointment item
+    $appointment = $outlook.CreateItem([Microsoft.Office.Interop.Outlook.OlItemType]::olAppointmentItem)
+
+    # Set the appointment properties
+    $appointment.Subject = "Your Blocker name"
+    $appointment.Start = $lastDay
+    $appointment.End = $lastDay
+    $appointment.AllDayEvent = $true
+    $appointment.BusyStatus = [Microsoft.Office.Interop.Outlook.OlBusyStatus]::olBusy
+
+    # Save the appointment
+    $appointment.Save()
+}
+
+Write-Host "Calendar has been updated with blocked days for the last day of each month."
